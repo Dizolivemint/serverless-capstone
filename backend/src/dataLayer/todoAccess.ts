@@ -1,11 +1,12 @@
 import * as AWS  from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-
-const XAWS = AWSXRay.captureAWS(AWS)
-
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
+import { createLogger } from '../utils/logger'
+
+const XAWS = AWSXRay.captureAWS(AWS)
+const logger = createLogger('DB Access')
 
 export class TodoAccess {
 
@@ -14,11 +15,16 @@ export class TodoAccess {
     private readonly todosTable = process.env.TODOS_TABLE) {
   }
 
-  async getAllTodoItems(): Promise<TodoItem[]> {
-    console.log('Getting all todos')
+  async getTodosForUser(userId): Promise<TodoItem[]> {
+    logger.info(`Getting all todos for user id ${userId}`)
 
-    const result = await this.docClient.scan({
-      TableName: this.todosTable
+    const result = await this.docClient.query({
+      TableName: this.todosTable,
+      IndexName: userId,
+      KeyConditionExpression: 'userId = :userId',
+      ExpressionAttributeValues: {
+        ':userId': userId
+      }
     }).promise()
 
     const items = result.Items
@@ -56,7 +62,7 @@ export class TodoAccess {
 
 function createDynamoDBClient() {
   if (process.env.IS_OFFLINE) {
-    console.log('Creating a local DynamoDB instance')
+    logger.info('Creating a local DynamoDB instance')
     return new XAWS.DynamoDB.DocumentClient({
       region: 'localhost',
       endpoint: 'http://localhost:8000'

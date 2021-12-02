@@ -5,25 +5,25 @@ import { TodoUpdate } from '../models/TodoUpdate'
 import { TodoAccess } from '../dataLayer/todoAccess'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
-import { parseUserId } from '../auth/utils'
 
 const todoAccess = new TodoAccess()
 
-export async function getAllTodoItems(): Promise<TodoItem[]> {
-  return todoAccess.getAllTodoItems()
+export async function getTodosForUser(
+    userId: string
+): Promise<TodoItem[]> {
+  return await todoAccess.getTodosForUser(userId)
 }
 
 export async function createTodoItem(
   createTodoRequest: CreateTodoRequest,
-  jwtToken: string
+  userId: string
 ): Promise<TodoItem> {
 
-  const itemId = uuid.v4()
-  const userId = parseUserId(jwtToken)
+  const todoId = uuid.v4()
 
   return await todoAccess.createTodoItem({
-    todoId: itemId,
-    userId: userId,
+    todoId,
+    userId,
     done: false,
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
@@ -33,15 +33,13 @@ export async function createTodoItem(
 
 export async function updateTodoItem(
     updateTodoRequest: UpdateTodoRequest,
-    jwtToken: string
+    userId: string,
+    todoId: string
   ): Promise<TodoUpdate> {
   
-    const itemId = uuid.v4()
-    const userId = parseUserId(jwtToken)
-  
     return await todoAccess.updateTodoItem({
-      todoId: itemId,
-      userId: userId,
+      todoId,
+      userId,
       done: false,
       name: updateTodoRequest.name,
       dueDate: updateTodoRequest.dueDate,
