@@ -13,7 +13,10 @@ export class TodoAccess {
 
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
-    private readonly todosTable = process.env.TODOS_TABLE) {
+    private readonly todosTable = process.env.TODOS_TABLE,
+    private readonly bucketName = process.env.IMAGES_S3_BUCKET,
+    private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION,
+    private readonly s3 = new XAWS.S3({ signatureVersion: 'v4'})) {
   }
 
   async getTodosForUser(userId): Promise<TodoItem[]> {
@@ -66,7 +69,7 @@ export class TodoAccess {
       userId
     }
 
-    await this.docClient.update({
+    await this.docClient.delete({
       TableName: this.todosTable,
       Key:{
         "todoId": todo.todoId,
@@ -75,6 +78,35 @@ export class TodoAccess {
     }).promise()
 
     return todo
+  }
+
+  async createAttachmentPresignedUrl(todoId: string, userId: string) {
+    const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
+  
+    logger.info('Storing new item for ', todoId)
+  
+    await this.docClient.update({
+      TableName: this.todosTable,
+      Key:{
+        "todoId": todoId,
+        "userId": userId
+      },
+      UpdateExpression: "set attachmentUrl = :a",
+      ExpressionAttributeValues:{
+        ":a": attachmentUrl
+      },
+      ReturnValues:"UPDATED_NEW"
+    }).promise()
+  
+    const uploadUrl = await this.s3.getSignedUrl('putObject', {
+      Bucket: this.bucketName,
+      Key: todoId,
+      Expires: this.urlExpiration
+    })
+
+    return {
+      uploadUrl
+    }
   }
 }
 
