@@ -17,7 +17,7 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      "item": newItem
+      item: newItem
     })
   }
 })
