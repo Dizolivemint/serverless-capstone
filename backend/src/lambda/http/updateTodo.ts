@@ -13,7 +13,7 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
   
   // Update a TODO item with the provided id using values in the "updatedTodo" object
-  const updatedItem = await updateTodoItem(updatedTodo, getUserId(event), todoId)
+  await updateTodoItem(updatedTodo, getUserId(event), todoId)
 
   return {
     statusCode: 201,
@@ -21,9 +21,7 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true
     },
-    body: JSON.stringify({
-      updatedItem
-    })
+    body: ""
   }
 })
 
