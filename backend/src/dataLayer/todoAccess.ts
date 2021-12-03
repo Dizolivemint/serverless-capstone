@@ -3,6 +3,7 @@ import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
+import { TodoDelete } from '../models/TodoDelete'
 import { createLogger } from '../utils/logger'
 
 const XAWS = AWSXRay.captureAWS(AWS)
@@ -54,6 +55,23 @@ export class TodoAccess {
         ":c": todo.done
       },
       ReturnValues:"UPDATED_NEW"
+    }).promise()
+
+    return todo
+  }
+  
+  async deleteTodoItem(todoId: string, userId: string): Promise<TodoDelete> {
+    const todo = {
+      todoId,
+      userId
+    }
+
+    await this.docClient.update({
+      TableName: this.todosTable,
+      Key:{
+        "todoId": todo.todoId,
+        "userId": todo.userId
+      }
     }).promise()
 
     return todo
