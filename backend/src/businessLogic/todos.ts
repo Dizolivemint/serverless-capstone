@@ -3,6 +3,7 @@ import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
 import { TodoDelete } from '../models/TodoDelete'
+import { UploadUrl } from '../models/UploadUrl'
 import { TodoAccess } from '../dataLayer/todoAccess'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
@@ -48,4 +49,8 @@ export async function updateTodoItem(
 
 export async function deleteTodoItem(todoId: string, userId: string): Promise<TodoDelete> {
   return await todoAccess.deleteTodoItem(todoId, userId)
+}
+
+export async function createAttachmentPresignedUrl(todoId: string, userId: string): Promise<UploadUrl> {
+  return await todoAccess.createAttachmentPresignedUrl(todoId, userId)
 }
