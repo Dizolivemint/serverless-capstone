@@ -2,9 +2,9 @@ import * as AWS  from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
-import { TodoUpdate } from '../models/TodoUpdate'
 import { TodoDelete } from '../models/TodoDelete'
 import { createLogger } from '../utils/logger'
+import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('DB Access')
@@ -14,9 +14,7 @@ export class TodoAccess {
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly todosTable = process.env.TODOS_TABLE,
-    private readonly bucketName = process.env.IMAGES_S3_BUCKET,
-    private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION,
-    private readonly s3 = new XAWS.S3({ signatureVersion: 'v4'})) {
+    private readonly bucketName = process.env.IMAGES_S3_BUCKET) {
   }
 
   async getTodosForUser(userId): Promise<TodoItem[]> {
@@ -44,8 +42,10 @@ export class TodoAccess {
     return todo
   }
 
-  async updateTodoItem(todo: TodoItem): Promise<TodoUpdate> {
-    await this.docClient.update({
+  async updateTodoItem(todo: TodoItem): Promise<UpdateTodoRequest> {
+    logger.info('Updating todo id ', todo.todoId)
+
+    const result = await this.docClient.update({
       TableName: this.todosTable,
       Key:{
         "todoId": todo.todoId,
@@ -60,7 +60,14 @@ export class TodoAccess {
       ReturnValues:"UPDATED_NEW"
     }).promise()
 
-    return todo
+    const { name, dueDate, done } = result.Attributes
+
+    const todoUpdated = {
+      name,
+      dueDate,
+      done
+    }
+    return todoUpdated
   }
   
   async deleteTodoItem(todoId: string, userId: string): Promise<TodoDelete> {
@@ -98,15 +105,7 @@ export class TodoAccess {
       ReturnValues:"UPDATED_NEW"
     }).promise()
   
-    const uploadUrl = await this.s3.getSignedUrl('putObject', {
-      Bucket: this.bucketName,
-      Key: todoId,
-      Expires: this.urlExpiration
-    })
-
-    return {
-      uploadUrl
-    }
+    return
   }
 }
 
