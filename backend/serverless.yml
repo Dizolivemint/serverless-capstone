@@ -1,4 +1,4 @@
-org: milesx
+org: dizolivemint
 app: serverless-todo-app
 service: serverless-todo-app
 
@@ -9,19 +9,6 @@ plugins:
   - serverless-plugin-tracing
   - serverless-dynamodb-local
   - serverless-offline
-  - serverless-iam-roles-per-function
-
-custom:
-  serverless-offline:
-    port: 3003
-  
-  dynamodb:
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-    stages:
-      - dev
     
 provider:
   name: aws
@@ -65,6 +52,17 @@ provider:
         - dynamodb:Query
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX}
 
+custom:
+  serverless-offline:
+    port: 3003
+  
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    stages:
+      - ${self:provider.stage}
 
 functions:
 
@@ -79,6 +77,7 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+          reqValidatorName: RequestBodyValidator
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -148,6 +147,7 @@ functions:
           path: todos/{todoId}
           cors: true
           authorizer: Auth
+          reqValidatorName: RequestBodyValidator
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -167,6 +167,7 @@ functions:
           path: todos/{todoId}/attachment
           cors: true
           authorizer: Auth
+          reqValidatorName: RequestBodyValidator
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -222,8 +223,8 @@ resources:
                 KeyType: HASH
               - AttributeName: createdAt
                 KeyType: RANGE
-              Projection:
-                ProjectionType: ALL
+            Projection:
+              ProjectionType: ALL
 
     # TODO: Complete the bucket properties below. 
     # Do not forget to add the CorsConfiguration propoerty
