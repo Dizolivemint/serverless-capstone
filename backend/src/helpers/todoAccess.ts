@@ -1,11 +1,11 @@
 import * as AWS  from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
 import { TodoDelete } from '../models/TodoDelete'
 import { createLogger } from '../utils/logger'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 
+const AWSXRay = require('aws-xray-sdk')
 const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('DB Access')
 
