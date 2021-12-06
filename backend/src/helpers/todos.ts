@@ -1,10 +1,74 @@
-import { TodosAccess } from './todosAcess'
+import { TodoAccess } from './todoAccess'
 import { AttachmentUtils } from './attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
-import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 import * as createError from 'http-errors'
 
-// TODO: Implement businessLogic
+import { TodoDelete } from '../models/TodoDelete'
+import { UploadUrl } from '../models/UploadUrl'
+
+const todoAccess = new TodoAccess()
+const attachmentUtil = new AttachmentUtils()
+
+export async function getTodosForUser(
+    userId: string
+): Promise<TodoItem[]> {
+  const todos = await todoAccess.getTodosForUser(userId)
+
+  if (todos.length < 1) createError(404, 'No todos found')
+
+  return todos
+}
+
+export async function createTodoItem(
+  createTodoRequest: CreateTodoRequest,
+  userId: string
+): Promise<TodoItem> {
+  const todoId = uuid.v4()
+
+  const todo = await todoAccess.createTodoItem({
+    todoId,
+    userId,
+    done: false,
+    name: createTodoRequest.name,
+    dueDate: createTodoRequest.dueDate,
+    createdAt: new Date().toISOString()
+  })
+
+  if (!todo) createError(500, 'Unable to create todo item')
+  
+  return todo
+}
+
+export async function updateTodoItem(
+    updateTodoRequest: UpdateTodoRequest,
+    userId: string,
+    todoId: string
+): Promise<UpdateTodoRequest> {
+  const updatedTodoItem = await todoAccess.updateTodoItem({
+    todoId,
+    userId,
+    done: updateTodoRequest.done,
+    name: updateTodoRequest.name,
+    dueDate: updateTodoRequest.dueDate,
+    createdAt: new Date().toISOString()
+  })
+
+  if (updateTodoRequest != updatedTodoItem) createError(500, 'Unable to update todo item')
+
+  return updatedTodoItem
+}
+
+export async function deleteTodoItem(todoId: string, userId: string): Promise<TodoDelete> {
+  return await todoAccess.deleteTodoItem(todoId, userId)
+}
+
+export async function createAttachmentPresignedUrl(todoId: string, userId: string): Promise<UploadUrl> {
+  if (!userId) createError(500, 'Valid user ID required')
+
+  const presignedUrl = attachmentUtil.createAttachmentPresignedUrl(todoId)
+  
+  return presignedUrl
+}
