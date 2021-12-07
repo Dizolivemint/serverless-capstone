@@ -10,8 +10,7 @@ import { getUserId } from '../utils';
 // Get all TODO items for a current user
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {   
-    const todos = getTodosForUser(getUserId(event))
-
+    const todos = await getTodosForUser(getUserId(event))
     return {
       statusCode: 201,
       headers: {
@@ -19,7 +18,6 @@ export const handler = middy(
         'Access-Control-Allow-Crentials': true
       },
       body: JSON.stringify({
-        msg:"To-do's for current user",
         todos
       })
     }
