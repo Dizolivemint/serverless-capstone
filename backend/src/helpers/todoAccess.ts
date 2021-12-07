@@ -21,8 +21,6 @@ export class TodoAccess {
   async getTodosForUser(userId): Promise<TodoItem[]> {
     logger.info(`Getting all todos for user id ${userId}`)
 
-
-
     const result = await this.docClient.query({
       TableName: this.todosTable,
       IndexName: this.createdAtIndex,
