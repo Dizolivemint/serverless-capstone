@@ -14,15 +14,18 @@ export class TodoAccess {
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly todosTable = process.env.TODOS_TABLE,
+    private readonly createdAtIndex = process.env.CREATED_AT_INDEX,
     private readonly bucketName = process.env.IMAGES_S3_BUCKET) {
   }
 
   async getTodosForUser(userId): Promise<TodoItem[]> {
     logger.info(`Getting all todos for user id ${userId}`)
 
+
+
     const result = await this.docClient.query({
       TableName: this.todosTable,
-      IndexName: userId,
+      IndexName: this.createdAtIndex,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
         ':userId': userId
