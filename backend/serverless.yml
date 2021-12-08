@@ -178,6 +178,7 @@ functions:
         Action:
           - dynamodb:Query
           - dynamodb:GetItem
+          - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
 resources:
@@ -259,7 +260,9 @@ resources:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
               Principal: '*'
-              Action: 's3:GetObject'
+              Action:
+                - s3:GetObject
+                - s3:PutObject
               Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
 
