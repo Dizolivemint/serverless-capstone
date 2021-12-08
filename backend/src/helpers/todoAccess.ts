@@ -15,7 +15,7 @@ export class TodoAccess {
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly todosTable = process.env.TODOS_TABLE,
     private readonly createdAtIndex = process.env.CREATED_AT_INDEX,
-    private readonly bucketName = process.env.IMAGES_S3_BUCKET) {
+    private readonly bucketName = process.env.ATTACHMENT_S3_BUCKET) {
   }
 
   async getTodosForUser(userId): Promise<TodoItem[]> {
@@ -61,13 +61,12 @@ export class TodoAccess {
       ReturnValues:"UPDATED_NEW"
     }).promise()
 
-    const { name, dueDate, done } = result.Attributes
-
     const todoUpdated = {
-      name,
-      dueDate,
-      done
+      name: result.Attributes.name,
+      dueDate: result.Attributes.dueDate,
+      done: result.Attributes.done
     }
+    
     return todoUpdated
   }
   
@@ -88,7 +87,8 @@ export class TodoAccess {
     return todo
   }
 
-  async createAttachmentPresignedUrl(todoId: string, userId: string) {
+  async addAttachmentUrl(todoId: string, userId: string) {
+    
     const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
   
     logger.info('Storing new item for ', todoId)
