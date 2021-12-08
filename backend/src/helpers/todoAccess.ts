@@ -52,7 +52,10 @@ export class TodoAccess {
         "todoId": todo.todoId,
         "userId": todo.userId
       },
-      UpdateExpression: "set name = :n, dueDate=:d, done=:c",
+      ExpressionAttributeNames: {
+        '#todo_name': 'name'
+      },
+      UpdateExpression: "set #todo_name = :n, dueDate=:d, done=:c",
       ExpressionAttributeValues:{
         ":n": todo.name,
         ":d": todo.dueDate,
@@ -61,12 +64,13 @@ export class TodoAccess {
       ReturnValues:"UPDATED_NEW"
     }).promise()
 
+    const { name, dueDate, done } = result.Attributes
+
     const todoUpdated = {
-      name: result.Attributes.name,
-      dueDate: result.Attributes.dueDate,
-      done: result.Attributes.done
+      name,
+      dueDate,
+      done
     }
-    
     return todoUpdated
   }
   
