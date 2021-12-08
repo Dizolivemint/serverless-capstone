@@ -68,7 +68,9 @@ export async function deleteTodoItem(todoId: string, userId: string): Promise<To
 export async function createAttachmentPresignedUrl(todoId: string, userId: string): Promise<UploadUrl> {
   if (!userId) createError(500, 'Valid user ID required')
 
-  const presignedUrl = attachmentUtil.createAttachmentPresignedUrl(todoId)
+  const presignedUrl = await attachmentUtil.createAttachmentPresignedUrl(todoId)
   
+  todoAccess.addAttachmentUrl(todoId, userId)
+
   return presignedUrl
 }
