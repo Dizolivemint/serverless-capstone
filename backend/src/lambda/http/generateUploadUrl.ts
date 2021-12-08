@@ -19,7 +19,9 @@ export const handler = middy(
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true
       },
-      body: JSON.stringify(presignedUrl)
+      body: JSON.stringify({
+        uploadUrl: presignedUrl
+      })
     }
   }
 )
