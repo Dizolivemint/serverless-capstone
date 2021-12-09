@@ -8,6 +8,21 @@
     },
     "dueDate": {
       "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "todoId": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "done": { 
+      "type": "boolean"
+    },
+    "attachmentUrl": {
+      "type": "string"
     }
   },
   "required": [
