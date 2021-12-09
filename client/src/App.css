@@ -31,3 +31,7 @@
     transform: rotate(360deg);
   }
 }
+
+.react-datepicker__input-container input[type="text"] {
+  height: 2.5rem;
+}
