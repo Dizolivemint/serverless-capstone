@@ -33,24 +33,6 @@ provider:
     # Enable API Gateway logs
     restApi: true
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - xray:PutTelemetryRecords
-        - xray:PutTraceSegments
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:PutItem
-        - dynamodb:GetItem
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX}
-
 custom:
   serverless-offline:
     port: 3003
@@ -100,7 +82,7 @@ functions:
           cors: true
           authorizer: Auth
           request:
-            schema:
+            schemas:
               application/json: ${file(models/create-todo-model.json)}
     iamRoleStatements:
       - Effect: Allow
