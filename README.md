@@ -1,7 +1,7 @@
 # Serverless Capstone
 
 New features:
-- Date picker
+- Due date picker
 
 # Serverless TODO
 
