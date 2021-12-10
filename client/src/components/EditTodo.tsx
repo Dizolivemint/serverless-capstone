@@ -90,7 +90,7 @@ export class EditTodo extends React.PureComponent<
     return (
       <Grid>
         <Grid.Row>
-          <h1>Edit Todo</h1>
+          <h1>Edit task</h1>
           <Grid.Column width={16}>
             <div className="wrapper border-color--grey border-radius--4">
               <Icon 
