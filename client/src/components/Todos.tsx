@@ -124,7 +124,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">Milesoft Planner</Header>
 
         {this.renderCreateTodoInput()}
 
@@ -139,7 +139,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         <Grid.Row>
           { this.state.showDueDate ? 
           <Grid.Column width={16}>
-            <div className="wrapper">
+            <div className="wrapper border-radius--4">
               <Icon 
                 name='calendar alternate outline'
                 size='big'
