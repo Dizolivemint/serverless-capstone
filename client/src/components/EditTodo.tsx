@@ -1,7 +1,15 @@
 import * as React from 'react'
-import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { getUploadUrl, uploadFile } from '../api/todos-api'
+import {
+  Grid,
+  Input,
+  Icon,
+  Form,
+  Button
+} from 'semantic-ui-react'
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css"
 
 enum UploadState {
   NoUpload,
@@ -20,7 +28,9 @@ interface EditTodoProps {
 
 interface EditTodoState {
   file: any
-  uploadState: UploadState
+  uploadState: UploadState,
+  title: string,
+  dueDate: Date
 }
 
 export class EditTodo extends React.PureComponent<
@@ -29,7 +39,9 @@ export class EditTodo extends React.PureComponent<
 > {
   state: EditTodoState = {
     file: undefined,
-    uploadState: UploadState.NoUpload
+    uploadState: UploadState.NoUpload,
+    title: '',
+    dueDate: new Date()
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,23 +88,64 @@ export class EditTodo extends React.PureComponent<
 
   render() {
     return (
-      <div>
-        <h1>Upload new image</h1>
-
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Field>
-            <label>File</label>
-            <input
-              type="file"
-              accept="image/*"
-              placeholder="Image to upload"
-              onChange={this.handleFileChange}
+      <Grid>
+        <Grid.Row>
+          <h1>Edit task</h1>
+          <Grid.Column width={16}>
+            <div className="wrapper border-color--grey border-radius--4">
+              <Icon 
+                name='calendar alternate outline'
+                size='big'
+              />
+              <DatePicker className="datepicker"
+                selected={this.state.dueDate}
+                onChange={(date: Date) => this.setState({ dueDate: date})}
+              />
+            </div>
+          </Grid.Column>
+          <Grid.Column width={16}>
+            <Input
+              icon='pencil'
+              iconPosition='left'
+              fluid
+              placeholder="To change the world..."
+              className="mt-1"
+              // onKeyDown={}
+              // onChange={}
             />
-          </Form.Field>
+          </Grid.Column>
+          <Grid.Column width={16}>
+            <Button
+              iconn='pencil'
+              iconPosition='left'
+              color='teal'
+              className='mt-1'
+              // onKeyDown={}
+              // onChange={}
+            >
+              Save
+            </Button>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <h1>Upload new image</h1>
+          <Grid.Column width={16}>
+            <Form onSubmit={this.handleSubmit}>
+              <Form.Field>
+                <label>File</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  placeholder="Image to upload"
+                  onChange={this.handleFileChange}
+                />
+              </Form.Field>
 
-          {this.renderButton()}
-        </Form>
-      </div>
+              {this.renderButton()}
+            </Form>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 
