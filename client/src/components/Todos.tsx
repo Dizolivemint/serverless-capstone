@@ -29,7 +29,9 @@ interface TodosState {
   todos: Todo[]
   newTodoName: string
   loadingTodos: boolean,
-  dueDate: Date
+  dueDate: Date,
+  showDueDate: boolean,
+  showNewButton: boolean
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
@@ -37,7 +39,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     todos: [],
     newTodoName: '',
     loadingTodos: true,
-    dueDate: this.calculateDueDate()
+    dueDate: this.calculateDueDate(),
+    showDueDate: false,
+    showNewButton: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +61,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
-        newTodoName: ''
+        newTodoName: '',
+        showDueDate: false,
+        showNewButton: true
       })
     } catch {
       alert('Todo creation failed')
@@ -125,19 +131,38 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid>
         <Grid.Row>
-          <Grid.Column width={1}>
-            <Icon 
-              name='calendar alternate outline'
-              size='big'/>
-          </Grid.Column>
-          <Grid.Column width={15}>
-            <DatePicker 
-              selected={this.state.dueDate}
-              onChange={(date: Date) => this.setState({ dueDate: date})}
-            />
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
+          { this.state.showDueDate ? 
+          <Grid.Column width={16}>
+            <div className="wrapper">
+              <Icon 
+                name='calendar alternate outline'
+                size='big'
+              />
+              <div className="wrapper predatepicker">
+                <h5>Due&nbsp;date</h5>
+              </div>
+              <DatePicker className="datepicker"
+                selected={this.state.dueDate}
+                onChange={(date: Date) => this.setState({ dueDate: date})}
+              />
+            </div>
+          </Grid.Column>:  null }
+          {this.state.showNewButton ?
+          <Grid.Column width={16}>
+            <Button
+              primary
+              icon
+              labelPosition='left'
+              onClick={() => { this.setState({ 
+                showNewButton: false,
+                showDueDate: true
+              }) 
+            }}
+            >
+              <Icon name='add' />
+              New task
+            </Button>
+          </Grid.Column> : 
           <Grid.Column width={16}>
             <Input
               action={{
@@ -153,10 +178,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               onChange={this.handleNameChange}
             />
           </Grid.Column>
-          <Grid.Column width={16}>
-            <Divider />
-          </Grid.Column>
+          }
         </Grid.Row>
+        <Divider />
       </Grid>
     )
   }
