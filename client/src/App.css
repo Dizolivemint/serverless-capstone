@@ -32,6 +32,24 @@
   }
 }
 
-.react-datepicker__input-container input[type="text"] {
-  height: 2.5rem;
+.datepicker {
+  border: none;
+  border-radius: 3px;
+  height: 29px;
+  width: 100px;
+}
+
+.predatepicker {
+  width: 122px;
+}
+
+.wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  background: #00aca5;
+  padding: 5px;
+  color: white;
+  border-radius: 4px;
 }
