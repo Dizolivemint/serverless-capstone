@@ -57,6 +57,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   onTodoCreate = async () => {
+    this.setState({ loadingTodos: true })
     try {
       const dueDate = this.stringifyDueDate(this.state.dueDate)
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
@@ -67,7 +68,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: [...this.state.todos, newTodo],
         newTodoName: '',
         showDueDate: false,
-        showNewButton: true
+        showNewButton: true,
+        loadingTodos: false
       })
     } catch {
       alert('Todo creation failed')
