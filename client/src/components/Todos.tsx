@@ -48,11 +48,15 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     this.setState({ newTodoName: event.target.value })
   }
 
+  handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') this.onTodoCreate()
+  }
+
   onEditButtonClick = (todoId: string) => {
     this.props.history.push(`/todos/${todoId}/edit`)
   }
 
-  onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onTodoCreate = async () => {
     try {
       const dueDate = this.stringifyDueDate(this.state.dueDate)
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
@@ -175,6 +179,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               fluid
               actionPosition="left"
               placeholder="To change the world..."
+              onKeyDown={this.handleKeyDown}
               onChange={this.handleNameChange}
             />
           </Grid.Column>
