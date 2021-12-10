@@ -225,7 +225,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               <Grid.Column width={10} verticalAlign="middle">
                 {todo.name}
               </Grid.Column>
-              <Grid.Column width={3} floated="right">
+              <Grid.Column width={3} verticalAlign="middle">
                 {todo.dueDate}
               </Grid.Column>
               <Grid.Column width={1} floated="right">
