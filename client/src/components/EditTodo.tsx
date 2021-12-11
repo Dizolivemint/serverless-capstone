@@ -88,7 +88,7 @@ export class EditTodo extends React.PureComponent<
 
   render() {
     return (
-      <Grid>
+      <Grid className="m-0">
         <Grid.Row>
           <h1>Edit task</h1>
           <Grid.Column width={16}>

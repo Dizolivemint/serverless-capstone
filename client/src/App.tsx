@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { Link, Route, Router, Switch } from 'react-router-dom'
-import { Grid, Menu, Segment } from 'semantic-ui-react'
+import { Grid, Menu, Segment, Header } from 'semantic-ui-react'
 
 import Auth from './auth/Auth'
 import { EditTodo } from './components/EditTodo'
@@ -57,13 +57,16 @@ export default class App extends Component<AppProps, AppState> {
 
   generateMenu() {
     return (
-      <Menu>
-        <Menu.Item name="home">
-          <Link to="/">Home</Link>
-        </Menu.Item>
+      <>
+        <Header as="h1">Milesoft Planner</Header>
+        <Menu>
+          <Menu.Item name="home">
+            <Link to="/">Home</Link>
+          </Menu.Item>
 
-        <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
-      </Menu>
+          <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
+        </Menu>
+      </>
     )
   }
 

@@ -7,7 +7,6 @@ import {
   Checkbox,
   Divider,
   Grid,
-  Header,
   Icon,
   Input,
   Image,
@@ -124,7 +123,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">Milesoft Planner</Header>
 
         {this.renderCreateTodoInput()}
 
