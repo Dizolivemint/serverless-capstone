@@ -22,6 +22,17 @@ export async function getTodosForUser(
   return todos
 }
 
+export async function getTodo(
+  userId: string,
+  todoId: string
+): Promise<TodoItem> {
+const todo = await todoAccess.getTodo(userId, todoId)
+
+if (!todo) createError(404, 'No todo found')
+
+return todo
+}
+
 export async function createTodoItem(
   createTodoRequest: CreateTodoRequest,
   userId: string
