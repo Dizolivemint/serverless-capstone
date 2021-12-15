@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Auth from '../auth/Auth'
-import { getUploadUrl, uploadFile } from '../api/todos-api'
+import { getUploadUrl, uploadFile, getTodo, patchTodo } from '../api/todos-api'
 import {
   Grid,
   Input,
@@ -10,6 +10,8 @@ import {
 } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
+import { Todo } from '../types/Todo'
+import { calculateDueDate, stringifyDueDate } from '../helpers/DueDate'
 
 enum UploadState {
   NoUpload,
@@ -27,9 +29,11 @@ interface EditTodoProps {
 }
 
 interface EditTodoState {
+  todo: Todo
   file: any
   uploadState: UploadState,
-  title: string,
+  loadingTodo: boolean,
+  newTodoName: string,
   dueDate: Date
 }
 
@@ -38,10 +42,36 @@ export class EditTodo extends React.PureComponent<
   EditTodoState
 > {
   state: EditTodoState = {
+    todo: {
+      todoId: '',
+      createdAt: '',
+      name: '',
+      dueDate: stringifyDueDate(calculateDueDate()),
+      done: false
+    },
     file: undefined,
     uploadState: UploadState.NoUpload,
-    title: '',
-    dueDate: new Date()
+    loadingTodo: true,
+    newTodoName: '',
+    dueDate: calculateDueDate()
+  }
+
+  async componentDidMount() {
+    try {
+      const todo = await getTodo(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      this.setState({
+        todo,
+        loadingTodo: false,
+        newTodoName: todo.name,
+        dueDate: new Date(todo.dueDate)
+      })
+    } catch (e) {
+      let errorMessage = "Failed to fetch task"
+      if (e instanceof Error) {
+        errorMessage = `${errorMessage}: ${e.message}`
+      }
+      alert(errorMessage)
+    }
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +116,40 @@ export class EditTodo extends React.PureComponent<
     })
   }
 
+  onTodoUpdate = async () => {
+    this.setState({ loadingTodo: true })
+    try {
+      const dueDate = stringifyDueDate(this.state.dueDate)
+      const newTodo = await patchTodo(this.props.auth.getIdToken(), 
+      this.props.match.params.todoId,
+      {
+        name: this.state.newTodoName,
+        dueDate,
+        done: this.state.todo.done
+      })
+      this.setState({
+        todo: { 
+          todoId: this.state.todo.todoId,
+          createdAt: this.state.todo.createdAt,
+          name: this.state.newTodoName,
+          done: this.state.todo.done,
+          dueDate: stringifyDueDate(this.state.dueDate)
+        },
+        loadingTodo: false
+      })
+    } catch {
+      alert('Todo creation failed')
+    }
+  }
+
+  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newTodoName: event.target.value })
+  }
+
+  handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') this.onTodoUpdate()
+  }
+
   render() {
     return (
       <Grid>
@@ -98,8 +162,10 @@ export class EditTodo extends React.PureComponent<
                 size='big'
               />
               <DatePicker className="datepicker"
-                selected={this.state.dueDate}
-                onChange={(date: Date) => this.setState({ dueDate: date})}
+                selected={new Date(this.state.todo.dueDate)}
+                onChange={(date: Date) => this.setState({ 
+                  dueDate: date
+                })}
               />
             </div>
           </Grid.Column>
@@ -110,8 +176,8 @@ export class EditTodo extends React.PureComponent<
               fluid
               placeholder="To change the world..."
               className="mt-1"
-              // onKeyDown={}
-              // onChange={}
+              onKeyDown={this.handleKeyDown}
+              onChange={this.handleNameChange}
             />
           </Grid.Column>
           <Grid.Column width={16}>
@@ -120,8 +186,7 @@ export class EditTodo extends React.PureComponent<
               iconPosition='left'
               color='teal'
               className='mt-1'
-              // onKeyDown={}
-              // onChange={}
+              onClick={this.onTodoUpdate}
             >
               Save
             </Button>

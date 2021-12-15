@@ -19,6 +19,7 @@ import Auth from '../auth/Auth'
 import { Todo } from '../types/Todo'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
+import { calculateDueDate, stringifyDueDate } from '../helpers/DueDate'
 
 interface TodosProps {
   auth: Auth
@@ -39,7 +40,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     todos: [],
     newTodoName: '',
     loadingTodos: true,
-    dueDate: this.calculateDueDate(),
+    dueDate: calculateDueDate(),
     showDueDate: false,
     showNewButton: true
   }
@@ -59,7 +60,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   onTodoCreate = async () => {
     this.setState({ loadingTodos: true })
     try {
-      const dueDate = this.stringifyDueDate(this.state.dueDate)
+      const dueDate = stringifyDueDate(this.state.dueDate)
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate
@@ -257,16 +258,5 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })}
       </Grid>
     )
-  }
-
-  calculateDueDate(): Date {
-    const date = new Date()
-    date.setDate(date.getDate() + 7)
-
-    return date as Date
-  }
-
-  stringifyDueDate(date: Date): string {
-    return dateFormat(date, 'yyyy-mm-dd') as string
   }
 }
