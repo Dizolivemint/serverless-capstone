@@ -7,7 +7,8 @@ import {
   Icon,
   Form,
   Button,
-  Loader
+  Loader,
+  Checkbox
 } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
@@ -36,7 +37,8 @@ interface EditTodoState {
   loadingTodo: boolean,
   savingTodo: boolean,
   newTodoName: string,
-  dueDate: Date
+  dueDate: Date,
+  done: boolean
 }
 
 export class EditTodo extends React.PureComponent<
@@ -56,7 +58,8 @@ export class EditTodo extends React.PureComponent<
     loadingTodo: true,
     savingTodo: false,
     newTodoName: '',
-    dueDate: calculateDueDate()
+    dueDate: calculateDueDate(),
+    done: false
   }
 
   async componentDidMount() {
@@ -67,7 +70,8 @@ export class EditTodo extends React.PureComponent<
         todo,
         loadingTodo: false,
         newTodoName: todo.name,
-        dueDate: utcFormatter(new Date(todo.dueDate))
+        dueDate: utcFormatter(new Date(todo.dueDate)),
+        done: todo.done
       })
     } catch (e) {
       let errorMessage = "Failed to fetch task"
@@ -136,7 +140,7 @@ export class EditTodo extends React.PureComponent<
           todoId: this.state.todo.todoId,
           createdAt: this.state.todo.createdAt,
           name: this.state.newTodoName,
-          done: this.state.todo.done,
+          done: this.state.done,
           dueDate: stringifyDueDate(this.state.dueDate)
         },
         loadingTodo: false,
@@ -157,7 +161,7 @@ export class EditTodo extends React.PureComponent<
 
   render() {
     return (
-      <Grid>
+      <Grid className='p-1'>
         {this.state.loadingTodo ? 
         <Grid.Row>
           <Loader indeterminate active inline="centered">
@@ -167,6 +171,14 @@ export class EditTodo extends React.PureComponent<
         :
         <Grid.Row>
           <h1>Edit task</h1>
+          <Grid.Column width={16}>
+            <div className="checkbox-wrapper border-color--grey border-radius--4">
+              <Checkbox
+                onChange={() => this.setState({ done: !this.state.done})}
+                checked={this.state.done}
+              />
+            </div>
+          </Grid.Column>
           <Grid.Column width={16}>
             <div className="wrapper border-color--grey border-radius--4">
               <Icon 
