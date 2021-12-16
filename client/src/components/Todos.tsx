@@ -73,7 +73,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         loadingTodos: false
       })
     } catch {
-      alert('Todo creation failed')
+      alert('Task creation failed')
     }
   }
 
@@ -84,7 +84,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: this.state.todos.filter(todo => todo.todoId !== todoId)
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Task deletion failed')
     }
   }
 
@@ -102,7 +102,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Task update failed')
     }
   }
 
@@ -205,7 +205,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Tasks
         </Loader>
       </Grid.Row>
     )

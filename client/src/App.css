@@ -66,3 +66,13 @@
 .mt-1 {
   margin-top: 1em!important;
 }
+
+.p-1 {
+  padding: 1em!important;
+}
+
+.checkbox-wrapper {
+  padding: 10px;
+  display: flex;
+  margin-bottom: 1em;
+}
