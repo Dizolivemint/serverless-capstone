@@ -6,12 +6,13 @@ import {
   Input,
   Icon,
   Form,
-  Button
+  Button,
+  Loader
 } from 'semantic-ui-react'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import { Todo } from '../types/Todo'
-import { calculateDueDate, stringifyDueDate } from '../helpers/DueDate'
+import { calculateDueDate, stringifyDueDate, utcFormatter } from '../helpers/DueDate'
 
 enum UploadState {
   NoUpload,
@@ -33,6 +34,7 @@ interface EditTodoState {
   file: any
   uploadState: UploadState,
   loadingTodo: boolean,
+  savingTodo: boolean,
   newTodoName: string,
   dueDate: Date
 }
@@ -52,18 +54,20 @@ export class EditTodo extends React.PureComponent<
     file: undefined,
     uploadState: UploadState.NoUpload,
     loadingTodo: true,
+    savingTodo: false,
     newTodoName: '',
     dueDate: calculateDueDate()
   }
 
   async componentDidMount() {
+    this.setState({ loadingTodo: true })
     try {
       const todo = await getTodo(this.props.auth.getIdToken(), this.props.match.params.todoId)
       this.setState({
         todo,
         loadingTodo: false,
         newTodoName: todo.name,
-        dueDate: new Date(todo.dueDate)
+        dueDate: utcFormatter(new Date(todo.dueDate))
       })
     } catch (e) {
       let errorMessage = "Failed to fetch task"
@@ -117,7 +121,7 @@ export class EditTodo extends React.PureComponent<
   }
 
   onTodoUpdate = async () => {
-    this.setState({ loadingTodo: true })
+    this.setState({ loadingTodo: true, savingTodo: true })
     try {
       const dueDate = stringifyDueDate(this.state.dueDate)
       const newTodo = await patchTodo(this.props.auth.getIdToken(), 
@@ -135,7 +139,8 @@ export class EditTodo extends React.PureComponent<
           done: this.state.todo.done,
           dueDate: stringifyDueDate(this.state.dueDate)
         },
-        loadingTodo: false
+        loadingTodo: false,
+        savingTodo: false
       })
     } catch {
       alert('Todo creation failed')
@@ -153,6 +158,13 @@ export class EditTodo extends React.PureComponent<
   render() {
     return (
       <Grid>
+        {this.state.loadingTodo ? 
+        <Grid.Row>
+          <Loader indeterminate active inline="centered">
+            {this.state.savingTodo ? <>Saving task</> : <>Loading task</>}
+          </Loader>
+        </Grid.Row>
+        :
         <Grid.Row>
           <h1>Edit task</h1>
           <Grid.Column width={16}>
@@ -162,7 +174,7 @@ export class EditTodo extends React.PureComponent<
                 size='big'
               />
               <DatePicker className="datepicker"
-                selected={new Date(this.state.todo.dueDate)}
+                selected={this.state.dueDate}
                 onChange={(date: Date) => this.setState({ 
                   dueDate: date
                 })}
@@ -175,6 +187,7 @@ export class EditTodo extends React.PureComponent<
               iconPosition='left'
               fluid
               placeholder="To change the world..."
+              value={this.state.newTodoName}
               className="mt-1"
               onKeyDown={this.handleKeyDown}
               onChange={this.handleNameChange}
@@ -192,6 +205,7 @@ export class EditTodo extends React.PureComponent<
             </Button>
           </Grid.Column>
         </Grid.Row>
+        }
         <Grid.Row>
           <h1>Upload new image</h1>
           <Grid.Column width={16}>
