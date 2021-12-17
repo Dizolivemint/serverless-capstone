@@ -38,7 +38,8 @@ interface EditTodoState {
   savingTodo: boolean,
   newTodoName: string,
   dueDate: Date,
-  done: boolean
+  done: boolean,
+  publicView: boolean
 }
 
 export class EditTodo extends React.PureComponent<
@@ -51,7 +52,8 @@ export class EditTodo extends React.PureComponent<
       createdAt: '',
       name: '',
       dueDate: stringifyDueDate(calculateDueDate()),
-      done: false
+      done: false,
+      publicView: false
     },
     file: undefined,
     uploadState: UploadState.NoUpload,
@@ -59,7 +61,8 @@ export class EditTodo extends React.PureComponent<
     savingTodo: false,
     newTodoName: '',
     dueDate: calculateDueDate(),
-    done: false
+    done: false,
+    publicView: false
   }
 
   async componentDidMount() {
@@ -71,7 +74,8 @@ export class EditTodo extends React.PureComponent<
         loadingTodo: false,
         newTodoName: todo.name,
         dueDate: utcFormatter(new Date(todo.dueDate)),
-        done: todo.done
+        done: todo.done,
+        publicView: todo.publicView
       })
     } catch (e) {
       let errorMessage = "Failed to fetch goal"
@@ -141,7 +145,8 @@ export class EditTodo extends React.PureComponent<
           createdAt: this.state.todo.createdAt,
           name: this.state.newTodoName,
           done: this.state.done,
-          dueDate: stringifyDueDate(this.state.dueDate)
+          dueDate: stringifyDueDate(this.state.dueDate),
+          publicView: this.state.publicView
         },
         loadingTodo: false,
         savingTodo: false
@@ -176,7 +181,7 @@ export class EditTodo extends React.PureComponent<
               <Checkbox
                 onChange={() => this.setState({ done: !this.state.done})}
                 checked={this.state.done}
-              />
+              />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Complete
             </div>
           </Grid.Column>
           <Grid.Column width={16}>
@@ -204,6 +209,14 @@ export class EditTodo extends React.PureComponent<
               onKeyDown={this.handleKeyDown}
               onChange={this.handleNameChange}
             />
+          </Grid.Column>
+          <Grid.Column width={16}>
+            <div className="checkbox-wrapper border-color--grey border-radius--4">
+              <Checkbox
+                onChange={() => this.setState({ publicView: !this.state.publicView})}
+                checked={this.state.publicView}
+              />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Visible to other users
+            </div>
           </Grid.Column>
           <Grid.Column width={16}>
             <Button
