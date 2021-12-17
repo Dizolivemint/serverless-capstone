@@ -11,6 +11,9 @@
     },
     "done": {
       "type": "boolean"
+    },
+    "publicView": {
+      "type": "boolean"
     }
   },
   "required": [

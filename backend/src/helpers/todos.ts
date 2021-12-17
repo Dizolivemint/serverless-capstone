@@ -22,6 +22,16 @@ export async function getTodosForUser(
   return todos
 }
 
+export async function getPublicTodos(
+  userId: string
+): Promise<TodoItem[]> {
+const todos = await todoAccess.getPublicTodos(userId)
+
+if (todos.length < 1) createError(404, 'No todos found')
+
+return todos
+}
+
 export async function getTodo(
   userId: string,
   todoId: string
@@ -45,7 +55,8 @@ export async function createTodoItem(
     done: false,
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    publicView: false
   })
 
   if (!todo) createError(500, 'Unable to create todo item')
@@ -64,7 +75,8 @@ export async function updateTodoItem(
     done: updateTodoRequest.done,
     name: updateTodoRequest.name,
     dueDate: updateTodoRequest.dueDate,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    publicView: updateTodoRequest.publicView
   })
 
   if (updateTodoRequest != updatedTodoItem) createError(500, 'Unable to update todo item')

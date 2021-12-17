@@ -3,6 +3,7 @@ export interface Todo {
   createdAt: string
   name: string
   dueDate: string
-  done: boolean
+  done: boolean,
+  publicView: boolean,
   attachmentUrl?: string
 }
