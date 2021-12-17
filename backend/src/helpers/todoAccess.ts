@@ -34,6 +34,22 @@ export class TodoAccess {
     return items as TodoItem[]
   }
 
+  async getPublicTodos(userId): Promise<TodoItem[]> {
+    logger.info(`Getting all todos for user id ${userId}`)
+
+    const result = await this.docClient.query({
+      TableName: this.todosTable,
+      IndexName: this.createdAtIndex,
+      KeyConditionExpression: 'publicView = :publicView',
+      ExpressionAttributeValues: {
+        ':publicView': true
+      }
+    }).promise()
+
+    const items = result.Items
+    return items as TodoItem[]
+  }
+
   async getTodo(userId, todoId): Promise<TodoItem> {
     logger.info(`Getting todo id ${todoId} for user id ${userId}`)
 
@@ -72,21 +88,23 @@ export class TodoAccess {
       ExpressionAttributeNames: {
         '#todo_name': 'name'
       },
-      UpdateExpression: "set #todo_name = :n, dueDate=:d, done=:c",
+      UpdateExpression: "set #todo_name = :n, dueDate=:d, done=:c, publicView=:p",
       ExpressionAttributeValues:{
         ":n": todo.name,
         ":d": todo.dueDate,
-        ":c": todo.done
+        ":c": todo.done,
+        ":p": todo.publicView
       },
       ReturnValues:"UPDATED_NEW"
     }).promise()
 
-    const { name, dueDate, done } = result.Attributes
+    const { name, dueDate, done, publicView } = result.Attributes
 
     const todoUpdated = {
       name,
       dueDate,
-      done
+      done,
+      publicView
     }
     return todoUpdated
   }
