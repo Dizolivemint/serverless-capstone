@@ -73,7 +73,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         loadingTodos: false
       })
     } catch {
-      alert('Task creation failed')
+      alert('Goal creation failed')
     }
   }
 
@@ -84,7 +84,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: this.state.todos.filter(todo => todo.todoId !== todoId)
       })
     } catch {
-      alert('Task deletion failed')
+      alert('Goal deletion failed')
     }
   }
 
@@ -102,7 +102,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })
       })
     } catch {
-      alert('Task update failed')
+      alert('Goal update failed')
     }
   }
 
@@ -125,8 +125,10 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">Milesoft Planner</Header>
-
+        <Header as="h1">New Year Goals</Header>
+        <h5 style={
+          {margin: "-1rem 124px 1rem"}
+        }>by&nbsp;Milesoft</h5>
         {this.renderCreateTodoInput()}
 
         {this.renderTodos()}
@@ -167,7 +169,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             }}
             >
               <Icon name='add' />
-              New task
+              New Goal
             </Button>
           </Grid.Column> : 
           <Grid.Column width={16}>
@@ -176,7 +178,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 color: 'teal',
                 labelPosition: 'left',
                 icon: 'add',
-                content: 'New task',
+                content: 'New Goal',
                 onClick: this.onTodoCreate
               }}
               fluid
@@ -205,7 +207,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading Tasks
+          Loading Goals
         </Loader>
       </Grid.Row>
     )

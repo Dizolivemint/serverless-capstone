@@ -74,7 +74,7 @@ export class EditTodo extends React.PureComponent<
         done: todo.done
       })
     } catch (e) {
-      let errorMessage = "Failed to fetch task"
+      let errorMessage = "Failed to fetch goal"
       if (e instanceof Error) {
         errorMessage = `${errorMessage}: ${e.message}`
       }
@@ -165,12 +165,12 @@ export class EditTodo extends React.PureComponent<
         {this.state.loadingTodo ? 
         <Grid.Row>
           <Loader indeterminate active inline="centered">
-            {this.state.savingTodo ? <>Saving task</> : <>Loading task</>}
+            {this.state.savingTodo ? <>Saving goal</> : <>Loading goal</>}
           </Loader>
         </Grid.Row>
         :
         <Grid.Row>
-          <h1>Edit task</h1>
+          <h1>Edit goal</h1>
           <Grid.Column width={16}>
             <div className="checkbox-wrapper border-color--grey border-radius--4">
               <Checkbox
