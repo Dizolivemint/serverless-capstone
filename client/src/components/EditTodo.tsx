@@ -210,12 +210,15 @@ export class EditTodo extends React.PureComponent<
               onChange={this.handleNameChange}
             />
           </Grid.Column>
-          <Grid.Column width={16}>
+          <Grid.Column 
+            width={16}
+            className='mt-1'
+          >
             <div className="checkbox-wrapper border-color--grey border-radius--4">
               <Checkbox
                 onChange={() => this.setState({ publicView: !this.state.publicView})}
                 checked={this.state.publicView}
-              />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Visible to other users
+              />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Public
             </div>
           </Grid.Column>
           <Grid.Column width={16}>
