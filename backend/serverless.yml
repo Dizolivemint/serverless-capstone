@@ -78,7 +78,7 @@ functions:
     events:
       - http:
           method: get
-          path: todos
+          path: visible
           cors: true
           authorizer: Auth
     iamRoleStatements:
