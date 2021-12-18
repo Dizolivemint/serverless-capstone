@@ -137,7 +137,8 @@ export class EditTodo extends React.PureComponent<
       {
         name: this.state.newTodoName,
         dueDate,
-        done: this.state.todo.done
+        done: this.state.todo.done,
+        publicView: this.state.publicView
       })
       this.setState({
         todo: { 

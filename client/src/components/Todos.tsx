@@ -94,7 +94,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
         name: todo.name,
         dueDate: todo.dueDate,
-        done: !todo.done
+        done: !todo.done,
+        publicView: todo.publicView
       })
       this.setState({
         todos: update(this.state.todos, {
