@@ -95,7 +95,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         name: todo.name,
         dueDate: todo.dueDate,
         done: !todo.done,
-        publicView: todo.publicView
+        isPublic: todo.isPublic ? 'x' : ''
       })
       this.setState({
         todos: update(this.state.todos, {
@@ -226,14 +226,15 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   checked={todo.done}
                 />
               </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
+              <Grid.Column width={5} verticalAlign="middle">
                 {todo.name}
               </Grid.Column>
               <Grid.Column width={3} verticalAlign="middle">
                 {todo.dueDate}
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
+              <Grid.Column width={3}>
                 <Button
+                  floated="right"
                   icon
                   color="blue"
                   onClick={() => this.onEditButtonClick(todo.todoId)}
@@ -241,8 +242,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   <Icon name="pencil" />
                 </Button>
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
+              <Grid.Column width={3}>
                 <Button
+                  floated="right"
                   icon
                   color="red"
                   onClick={() => this.onTodoDelete(todo.todoId)}
@@ -251,7 +253,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 </Button>
               </Grid.Column>
               {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
+                <Image className="mt-1" src={todo.attachmentUrl} size="small" wrapped />
               )}
               <Grid.Column width={16}>
                 <Divider />

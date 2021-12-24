@@ -4,6 +4,6 @@ export interface Todo {
   name: string
   dueDate: string
   done: boolean,
-  publicView: boolean,
+  isPublic?: string,
   attachmentUrl?: string
 }

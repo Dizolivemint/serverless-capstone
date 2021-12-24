@@ -7,6 +7,7 @@ import { EditTodo } from './components/EditTodo'
 import { LogIn } from './components/LogIn'
 import { NotFound } from './components/NotFound'
 import { Todos } from './components/Todos'
+import { Pub } from './components/Pub'
 
 import './App.css'
 
@@ -61,6 +62,10 @@ export default class App extends Component<AppProps, AppState> {
         <Menu.Item name="home">
           <Link to="/">Home</Link>
         </Menu.Item>
+        {this.props.auth.isAuthenticated() ? 
+        <Menu.Item name="public">
+          <Link to="/pub">Public</Link>
+        </Menu.Item> : null}
 
         <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
       </Menu>
@@ -95,6 +100,14 @@ export default class App extends Component<AppProps, AppState> {
           exact
           render={props => {
             return <Todos {...props} auth={this.props.auth} />
+          }}
+        />
+
+        <Route
+          path="/pub"
+          exact
+          render={props => {
+            return <Pub {...props} auth={this.props.auth} />
           }}
         />
 

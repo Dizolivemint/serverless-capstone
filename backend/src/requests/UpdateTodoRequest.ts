@@ -5,5 +5,5 @@ export interface UpdateTodoRequest {
   name: string
   dueDate: string
   done: boolean
-  publicView: boolean
+  isPublic: string
 }
