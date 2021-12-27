@@ -22,6 +22,9 @@
     "done": { 
       "type": "boolean"
     },
+    "isPublic": { 
+      "type": "string"
+    },
     "attachmentUrl": {
       "type": "string"
     }

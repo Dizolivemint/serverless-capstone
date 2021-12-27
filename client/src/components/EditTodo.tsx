@@ -1,7 +1,19 @@
 import * as React from 'react'
-import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
-import { getUploadUrl, uploadFile } from '../api/todos-api'
+import { getUploadUrl, uploadFile, getTodo, patchTodo } from '../api/todos-api'
+import {
+  Grid,
+  Input,
+  Icon,
+  Form,
+  Button,
+  Loader,
+  Checkbox
+} from 'semantic-ui-react'
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css"
+import { Todo } from '../types/Todo'
+import { calculateDueDate, stringifyDueDate, utcFormatter } from '../helpers/DueDate'
 
 enum UploadState {
   NoUpload,
@@ -19,8 +31,15 @@ interface EditTodoProps {
 }
 
 interface EditTodoState {
+  todo: Todo
   file: any
-  uploadState: UploadState
+  uploadState: UploadState,
+  loadingTodo: boolean,
+  savingTodo: boolean,
+  newTodoName: string,
+  dueDate: Date,
+  done: boolean,
+  isPublic: string
 }
 
 export class EditTodo extends React.PureComponent<
@@ -28,8 +47,43 @@ export class EditTodo extends React.PureComponent<
   EditTodoState
 > {
   state: EditTodoState = {
+    todo: {
+      todoId: '',
+      createdAt: '',
+      name: '',
+      dueDate: stringifyDueDate(calculateDueDate()),
+      done: false,
+      isPublic: 'o'
+    },
     file: undefined,
-    uploadState: UploadState.NoUpload
+    uploadState: UploadState.NoUpload,
+    loadingTodo: true,
+    savingTodo: false,
+    newTodoName: '',
+    dueDate: calculateDueDate(),
+    done: false,
+    isPublic: 'o'
+  }
+
+  async componentDidMount() {
+    this.setState({ loadingTodo: true })
+    try {
+      const todo = await getTodo(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      this.setState({
+        todo,
+        loadingTodo: false,
+        newTodoName: todo.name,
+        dueDate: utcFormatter(new Date(todo.dueDate)),
+        done: todo.done,
+        isPublic: todo.isPublic ? 'x' : ''
+      })
+    } catch (e) {
+      let errorMessage = "Failed to fetch goal"
+      if (e instanceof Error) {
+        errorMessage = `${errorMessage}: ${e.message}`
+      }
+      alert(errorMessage)
+    }
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,25 +128,132 @@ export class EditTodo extends React.PureComponent<
     })
   }
 
+  onTodoUpdate = async () => {
+    this.setState({ loadingTodo: true, savingTodo: true })
+    try {
+      const dueDate = stringifyDueDate(this.state.dueDate)
+      const newTodo = await patchTodo(this.props.auth.getIdToken(), 
+      this.props.match.params.todoId,
+      {
+        name: this.state.newTodoName,
+        dueDate,
+        done: this.state.todo.done,
+        isPublic: this.state.isPublic
+      })
+      this.setState({
+        todo: { 
+          todoId: this.state.todo.todoId,
+          createdAt: this.state.todo.createdAt,
+          name: this.state.newTodoName,
+          done: this.state.done,
+          dueDate: stringifyDueDate(this.state.dueDate),
+          isPublic: this.state.isPublic
+        },
+        loadingTodo: false,
+        savingTodo: false
+      })
+    } catch {
+      alert('Todo creation failed')
+    }
+  }
+
+  handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newTodoName: event.target.value })
+  }
+
+  handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') this.onTodoUpdate()
+  }
+
   render() {
     return (
-      <div>
-        <h1>Upload new image</h1>
-
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Field>
-            <label>File</label>
-            <input
-              type="file"
-              accept="image/*"
-              placeholder="Image to upload"
-              onChange={this.handleFileChange}
+      <Grid className='p-1'>
+        {this.state.loadingTodo ? 
+        <Grid.Row>
+          <Loader indeterminate active inline="centered">
+            {this.state.savingTodo ? <>Saving goal</> : <>Loading goal</>}
+          </Loader>
+        </Grid.Row>
+        :
+        <Grid.Row>
+          <h1>Edit goal</h1>
+          <Grid.Column width={16}>
+            <div className="checkbox-wrapper border-color--grey border-radius--4">
+              <Checkbox
+                onChange={() => this.setState({ done: !this.state.done})}
+                checked={this.state.done}
+              />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Complete
+            </div>
+          </Grid.Column>
+          <Grid.Column width={16}>
+            <div className="wrapper border-color--grey border-radius--4">
+              <Icon 
+                name='calendar alternate outline'
+                size='big'
+              />
+              <DatePicker className="datepicker"
+                selected={this.state.dueDate}
+                onChange={(date: Date) => this.setState({ 
+                  dueDate: date
+                })}
+              />
+            </div>
+          </Grid.Column>
+          <Grid.Column width={16}>
+            <Input
+              icon='pencil'
+              iconPosition='left'
+              fluid
+              placeholder="To change the world..."
+              value={this.state.newTodoName}
+              className="mt-1"
+              onKeyDown={this.handleKeyDown}
+              onChange={this.handleNameChange}
             />
-          </Form.Field>
+          </Grid.Column>
+          <Grid.Column 
+            width={16}
+            className='mt-1'
+          >
+            <div className="checkbox-wrapper border-color--grey border-radius--4">
+              <Checkbox
+                onChange={() => this.setState({ isPublic: this.state.isPublic ? 'o' : 'x'})}
+                checked={this.state.isPublic === 'x' ? true : false }
+              />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Public
+            </div>
+          </Grid.Column>
+          <Grid.Column width={16}>
+            <Button
+              iconn='pencil'
+              iconPosition='left'
+              color='teal'
+              className='mt-1'
+              onClick={this.onTodoUpdate}
+            >
+              Save
+            </Button>
+          </Grid.Column>
+        </Grid.Row>
+        }
+        <Grid.Row>
+          <h1>Upload new image</h1>
+          <Grid.Column width={16}>
+            <Form onSubmit={this.handleSubmit}>
+              <Form.Field>
+                <label>File</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  placeholder="Image to upload"
+                  onChange={this.handleFileChange}
+                />
+              </Form.Field>
 
-          {this.renderButton()}
-        </Form>
-      </div>
+              {this.renderButton()}
+            </Form>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 

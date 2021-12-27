@@ -17,6 +17,9 @@ import {
 import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
 import { Todo } from '../types/Todo'
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css"
+import { calculateDueDate, stringifyDueDate } from '../helpers/DueDate'
 
 interface TodosProps {
   auth: Auth
@@ -26,37 +29,51 @@ interface TodosProps {
 interface TodosState {
   todos: Todo[]
   newTodoName: string
-  loadingTodos: boolean
+  loadingTodos: boolean,
+  dueDate: Date,
+  showDueDate: boolean,
+  showNewButton: boolean
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
-    loadingTodos: true
+    loadingTodos: true,
+    dueDate: calculateDueDate(),
+    showDueDate: false,
+    showNewButton: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newTodoName: event.target.value })
   }
 
+  handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') this.onTodoCreate()
+  }
+
   onEditButtonClick = (todoId: string) => {
     this.props.history.push(`/todos/${todoId}/edit`)
   }
 
-  onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onTodoCreate = async () => {
+    this.setState({ loadingTodos: true })
     try {
-      const dueDate = this.calculateDueDate()
+      const dueDate = stringifyDueDate(this.state.dueDate)
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
-        newTodoName: ''
+        newTodoName: '',
+        showDueDate: false,
+        showNewButton: true,
+        loadingTodos: false
       })
     } catch {
-      alert('Todo creation failed')
+      alert('Goal creation failed')
     }
   }
 
@@ -67,7 +84,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: this.state.todos.filter(todo => todo.todoId !== todoId)
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Goal deletion failed')
     }
   }
 
@@ -77,7 +94,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
         name: todo.name,
         dueDate: todo.dueDate,
-        done: !todo.done
+        done: !todo.done,
+        isPublic: todo.isPublic ? 'x' : ''
       })
       this.setState({
         todos: update(this.state.todos, {
@@ -85,7 +103,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Goal update failed')
     }
   }
 
@@ -108,8 +126,10 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
-
+        <Header as="h1">New Year Goals</Header>
+        <h5 style={
+          {margin: "-1rem 124px 1rem"}
+        }>by&nbsp;Milesoft</h5>
         {this.renderCreateTodoInput()}
 
         {this.renderTodos()}
@@ -119,26 +139,60 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   renderCreateTodoInput() {
     return (
-      <Grid.Row>
-        <Grid.Column width={16}>
-          <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'New task',
-              onClick: this.onTodoCreate
+      <Grid>
+        <Grid.Row>
+          { this.state.showDueDate ? 
+          <Grid.Column width={16}>
+            <div className="wrapper border-radius--4">
+              <Icon 
+                name='calendar alternate outline'
+                size='big'
+              />
+              <div className="wrapper predatepicker">
+                <h5>Due&nbsp;date</h5>
+              </div>
+              <DatePicker className="datepicker"
+                selected={this.state.dueDate}
+                onChange={(date: Date) => this.setState({ dueDate: date})}
+              />
+            </div>
+          </Grid.Column>:  null }
+          {this.state.showNewButton ?
+          <Grid.Column width={16}>
+            <Button
+              primary
+              icon
+              labelPosition='left'
+              onClick={() => { this.setState({ 
+                showNewButton: false,
+                showDueDate: true
+              }) 
             }}
-            fluid
-            actionPosition="left"
-            placeholder="To change the world..."
-            onChange={this.handleNameChange}
-          />
-        </Grid.Column>
-        <Grid.Column width={16}>
-          <Divider />
-        </Grid.Column>
-      </Grid.Row>
+            >
+              <Icon name='add' />
+              New Goal
+            </Button>
+          </Grid.Column> : 
+          <Grid.Column width={16}>
+            <Input
+              action={{
+                color: 'teal',
+                labelPosition: 'left',
+                icon: 'add',
+                content: 'New Goal',
+                onClick: this.onTodoCreate
+              }}
+              fluid
+              actionPosition="left"
+              placeholder="To change the world..."
+              onKeyDown={this.handleKeyDown}
+              onChange={this.handleNameChange}
+            />
+          </Grid.Column>
+          }
+        </Grid.Row>
+        <Divider />
+      </Grid>
     )
   }
 
@@ -154,7 +208,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Goals
         </Loader>
       </Grid.Row>
     )
@@ -172,14 +226,15 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   checked={todo.done}
                 />
               </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
+              <Grid.Column width={5} verticalAlign="middle">
                 {todo.name}
               </Grid.Column>
-              <Grid.Column width={3} floated="right">
+              <Grid.Column width={3} verticalAlign="middle">
                 {todo.dueDate}
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
+              <Grid.Column width={3}>
                 <Button
+                  floated="right"
                   icon
                   color="blue"
                   onClick={() => this.onEditButtonClick(todo.todoId)}
@@ -187,8 +242,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   <Icon name="pencil" />
                 </Button>
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
+              <Grid.Column width={3}>
                 <Button
+                  floated="right"
                   icon
                   color="red"
                   onClick={() => this.onTodoDelete(todo.todoId)}
@@ -197,7 +253,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 </Button>
               </Grid.Column>
               {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
+                <Image className="mt-1" src={todo.attachmentUrl} size="small" wrapped />
               )}
               <Grid.Column width={16}>
                 <Divider />
@@ -207,12 +263,5 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })}
       </Grid>
     )
-  }
-
-  calculateDueDate(): string {
-    const date = new Date()
-    date.setDate(date.getDate() + 7)
-
-    return dateFormat(date, 'yyyy-mm-dd') as string
   }
 }

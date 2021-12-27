@@ -11,6 +11,9 @@
     },
     "done": {
       "type": "boolean"
+    },
+    "isPublic": {
+      "type": "string"
     }
   },
   "required": [

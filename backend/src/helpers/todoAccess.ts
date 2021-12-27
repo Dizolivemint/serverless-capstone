@@ -1,6 +1,7 @@
 import * as AWS  from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
+import { PubItem } from '../models/PubItem'
 import { TodoDelete } from '../models/TodoDelete'
 import { createLogger } from '../utils/logger'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
@@ -15,6 +16,7 @@ export class TodoAccess {
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly todosTable = process.env.TODOS_TABLE,
     private readonly createdAtIndex = process.env.CREATED_AT_INDEX,
+    private readonly pubIndex = process.env.TODOS_PUBLIC_INDEX,
     private readonly bucketName = process.env.ATTACHMENT_S3_BUCKET) {
   }
 
@@ -32,6 +34,39 @@ export class TodoAccess {
 
     const items = result.Items
     return items as TodoItem[]
+  }
+
+  async getPublicTodos(): Promise<PubItem[]> {
+    logger.info(`Getting all public todos`)
+
+    const result = await this.docClient.query({
+      TableName: this.todosTable,
+      IndexName: this.pubIndex,
+      KeyConditionExpression: 'isPublic = :isPublic',
+      ExpressionAttributeValues: {
+        ':isPublic': 'x'
+      }
+    }).promise()
+
+    const items = result.Items
+    return items as PubItem[]
+  }
+
+  async getTodo(userId, todoId): Promise<TodoItem> {
+    logger.info(`Getting todo id ${todoId} for user id ${userId}`)
+
+    const result = await this.docClient.query({
+      TableName: this.todosTable,
+      IndexName: this.createdAtIndex,
+      KeyConditionExpression: 'userId = :userId and todoId = :todoId',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+        ':todoId': todoId
+      }
+    }).promise()
+
+    const item = result.Items[0]
+    return item as TodoItem
   }
 
   async createTodoItem(todo: TodoItem): Promise<TodoItem> {
@@ -55,21 +90,23 @@ export class TodoAccess {
       ExpressionAttributeNames: {
         '#todo_name': 'name'
       },
-      UpdateExpression: "set #todo_name = :n, dueDate=:d, done=:c",
+      UpdateExpression: "set #todo_name = :n, dueDate=:d, done=:c, isPublic=:p",
       ExpressionAttributeValues:{
         ":n": todo.name,
         ":d": todo.dueDate,
-        ":c": todo.done
+        ":c": todo.done,
+        ":p": todo.isPublic
       },
       ReturnValues:"UPDATED_NEW"
     }).promise()
 
-    const { name, dueDate, done } = result.Attributes
+    const { name, dueDate, done, isPublic } = result.Attributes
 
     const todoUpdated = {
       name,
       dueDate,
-      done
+      done,
+      isPublic
     }
     return todoUpdated
   }
