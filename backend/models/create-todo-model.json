@@ -22,8 +22,8 @@
     "done": { 
       "type": "boolean"
     },
-    "publicView": { 
-      "type": "boolean"
+    "isPublic": { 
+      "type": "string"
     },
     "attachmentUrl": {
       "type": "string"

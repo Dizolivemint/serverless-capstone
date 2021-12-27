@@ -39,7 +39,7 @@ interface EditTodoState {
   newTodoName: string,
   dueDate: Date,
   done: boolean,
-  publicView: boolean
+  isPublic: string
 }
 
 export class EditTodo extends React.PureComponent<
@@ -53,7 +53,7 @@ export class EditTodo extends React.PureComponent<
       name: '',
       dueDate: stringifyDueDate(calculateDueDate()),
       done: false,
-      publicView: false
+      isPublic: 'o'
     },
     file: undefined,
     uploadState: UploadState.NoUpload,
@@ -62,7 +62,7 @@ export class EditTodo extends React.PureComponent<
     newTodoName: '',
     dueDate: calculateDueDate(),
     done: false,
-    publicView: false
+    isPublic: 'o'
   }
 
   async componentDidMount() {
@@ -75,7 +75,7 @@ export class EditTodo extends React.PureComponent<
         newTodoName: todo.name,
         dueDate: utcFormatter(new Date(todo.dueDate)),
         done: todo.done,
-        publicView: todo.publicView
+        isPublic: todo.isPublic ? 'x' : ''
       })
     } catch (e) {
       let errorMessage = "Failed to fetch goal"
@@ -138,7 +138,7 @@ export class EditTodo extends React.PureComponent<
         name: this.state.newTodoName,
         dueDate,
         done: this.state.todo.done,
-        publicView: this.state.publicView
+        isPublic: this.state.isPublic
       })
       this.setState({
         todo: { 
@@ -147,7 +147,7 @@ export class EditTodo extends React.PureComponent<
           name: this.state.newTodoName,
           done: this.state.done,
           dueDate: stringifyDueDate(this.state.dueDate),
-          publicView: this.state.publicView
+          isPublic: this.state.isPublic
         },
         loadingTodo: false,
         savingTodo: false
@@ -217,8 +217,8 @@ export class EditTodo extends React.PureComponent<
           >
             <div className="checkbox-wrapper border-color--grey border-radius--4">
               <Checkbox
-                onChange={() => this.setState({ publicView: !this.state.publicView})}
-                checked={this.state.publicView}
+                onChange={() => this.setState({ isPublic: this.state.isPublic ? 'o' : 'x'})}
+                checked={this.state.isPublic === 'x' ? true : false }
               />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Public
             </div>
           </Grid.Column>

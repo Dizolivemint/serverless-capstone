@@ -1,6 +1,7 @@
 import { TodoAccess } from './todoAccess'
 import { AttachmentUtils } from './attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
+import { PubItem } from '../models/PubItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import * as uuid from 'uuid'
@@ -24,8 +25,21 @@ export async function getTodosForUser(
 
 export async function getPublicTodos(
   userId: string
-): Promise<TodoItem[]> {
-const todos = await todoAccess.getPublicTodos(userId)
+): Promise<PubItem[]> {
+
+if (!userId) {
+  createError(403, 'Please log in first')
+  return [
+    {
+      todoId: 'unknown',
+      createdAt: '',
+      name: 'Please login first',
+      isPublic: 'x'
+    }
+  ]
+}
+
+const todos = await todoAccess.getPublicTodos()
 
 if (todos.length < 1) createError(404, 'No todos found')
 
@@ -55,8 +69,7 @@ export async function createTodoItem(
     done: false,
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
-    createdAt: new Date().toISOString(),
-    publicView: false
+    createdAt: new Date().toISOString()
   })
 
   if (!todo) createError(500, 'Unable to create todo item')
@@ -76,7 +89,7 @@ export async function updateTodoItem(
     name: updateTodoRequest.name,
     dueDate: updateTodoRequest.dueDate,
     createdAt: new Date().toISOString(),
-    publicView: updateTodoRequest.publicView
+    isPublic: updateTodoRequest.isPublic
   })
 
   if (updateTodoRequest != updatedTodoItem) createError(500, 'Unable to update todo item')
